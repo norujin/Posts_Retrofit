@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -30,17 +32,26 @@ public class MainActivity extends AppCompatActivity {
         result = (TextView) findViewById(R.id.postTxtViewId);
 
         Gson gson = new GsonBuilder().serializeNulls().create();
+
+        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(httpLoggingInterceptor)
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://jsonplaceholder.typicode.com/")
                 .addConverterFactory(GsonConverterFactory.create(gson))
+                .client(okHttpClient)
                 .build();
         jsonPlaceHolderApi = retrofit.create(JsonPlaceHolderApi.class);
 
         //getPosts ();
         //getComments();
         //createPost();
-        //updatePost();
-        deletePost();
+        updatePost();
+        //deletePost();
 
     }
 
@@ -188,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
 
         Post post = new Post(22, null, "yoo yoo");
 
-        Call<Post> call = jsonPlaceHolderApi.patchPost(5,post);
+        Call<Post> call = jsonPlaceHolderApi.putPost(5,post);
 
         call.enqueue(new Callback<Post>() {
             @Override
